@@ -6,10 +6,6 @@
 @media(max-width:440px){.app-shell{padding:0 12px}.topbar{height:62px}.top-note{font-size:8px;letter-spacing:.7px}.intro{padding:34px 0 27px}.intro h1{font-size:48px}.intro-copy{font-size:12px}.capture-panel,.preview-panel{padding:15px;border-radius:14px}.panel-heading{margin-bottom:15px}.panel-heading h2{font-size:14px}.panel-heading p{font-size:10px}.shot-count{font-size:9px}.filter-list,.props-list{gap:5px}.filter-option{font-size:8px}.filter-swatch{height:42px}.prop-option{min-height:66px}.prop-option>span{font-size:22px}.prop-option small{font-size:8px}.strip-stage{padding:18px 10px;min-height:250px}.strip{width:min(100%,205px)}.footer{font-size:9px}.footer>span:nth-child(2){max-width:140px;text-align:center}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
-/* =================================
-   MOBILE RESPONSIVE FIX
-================================= */
-
 @media (max-width: 600px) {
 
   html, body, #root {

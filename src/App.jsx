@@ -120,6 +120,167 @@ export default function App() {
   const updatePhoto = (id, patch) => setPhotos(p => p.map(x => x.id === id ? { ...x, ...patch } : x));
 
  
+// const exportStrip = async () => {
+//   if (!photos.length) {
+//     setCameraError('Take or upload at least one photo first.');
+//     return;
+//   }
+
+//   try {
+//     const width = 900;
+//     const pad = 48;
+//     const gap = 18;
+//     const imageH = 560;
+//     const hasCaption = caption.trim().length > 0;
+//     const footer = hasCaption ? 130 : 54;
+
+//     const canvas = document.createElement('canvas');
+//     canvas.width = width;
+//     canvas.height =
+//       pad * 2 +
+//       photos.length * imageH +
+//       (photos.length - 1) * gap +
+//       footer;
+
+//     const ctx = canvas.getContext('2d');
+
+//     if (!ctx) {
+//       throw new Error('Canvas is not supported by this browser.');
+//     }
+
+//     ctx.fillStyle = stripColor;
+//     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+//     const loadImage = (src) =>
+//       new Promise((resolve, reject) => {
+//         const img = new Image();
+
+//         img.onload = () => {
+//           if (img.naturalWidth === 0 || img.naturalHeight === 0) {
+//             reject(new Error('The selected photo has invalid dimensions.'));
+//           } else {
+//             resolve(img);
+//           }
+//         };
+
+//         img.onerror = () =>
+//           reject(
+//             new Error(
+//               'A photo could not be loaded. Try a JPG or PNG image.'
+//             )
+//           );
+
+//         img.src = src;
+//       });
+
+//     const images = await Promise.all(
+//       photos.map((photo) => loadImage(photo.data))
+//     );
+
+//     images.forEach((img, i) => {
+//       const photo = photos[i];
+//       const x = pad;
+//       const y = pad + i * (imageH + gap);
+//       const boxW = width - pad * 2;
+
+//       // Crop the image to fill its photo frame.
+//       const scale = Math.max(
+//         boxW / img.naturalWidth,
+//         imageH / img.naturalHeight
+//       );
+
+//       const sourceW = boxW / scale;
+//       const sourceH = imageH / scale;
+//       const sourceX = (img.naturalWidth - sourceW) / 2;
+//       const sourceY = (img.naturalHeight - sourceH) / 2;
+
+//       ctx.save();
+//       ctx.beginPath();
+//       ctx.rect(x, y, boxW, imageH);
+//       ctx.clip();
+
+//       ctx.filter =
+//         FILTERS.find((f) => f.id === photo.filter)?.css || 'none';
+
+//       ctx.drawImage(
+//         img,
+//         sourceX,
+//         sourceY,
+//         sourceW,
+//         sourceH,
+//         x,
+//         y,
+//         boxW,
+//         imageH
+//       );
+
+//       ctx.filter = 'none';
+
+//       // Add the selected prop overlay.
+//       if (photo.prop) {
+//         const overlay = PROPS.find((p) => p.id === photo.prop);
+
+//         if (overlay) {
+//           ctx.font = '76px sans-serif';
+//           ctx.textAlign = 'center';
+//           ctx.fillText(overlay.emoji, width / 2, y + 100);
+//         }
+//       }
+
+//       ctx.restore();
+//     });
+
+//     // Draw the caption.
+//     if (hasCaption) {
+//       ctx.fillStyle = '#302b28';
+//       ctx.textAlign = 'center';
+//       ctx.font = 'italic 34px Georgia, serif';
+//       ctx.fillText(
+//         caption.trim().slice(0, 48),
+//         width / 2,
+//         canvas.height - 65
+//       );
+//     }
+
+//     // Export as a PNG Blob for better memory handling.
+//     const blob = await new Promise((resolve, reject) => {
+//       try {
+//         canvas.toBlob((result) => {
+//           if (result) {
+//             resolve(result);
+//           } else {
+//             reject(new Error('PNG generation failed.'));
+//           }
+//         }, 'image/png');
+//       } catch (error) {
+//         reject(error);
+//       }
+//     });
+
+//     const url = URL.createObjectURL(blob);
+//     const link = document.createElement('a');
+
+//     link.href = url;
+//     link.download = 'snapstrip-photobooth.png';
+//     document.body.appendChild(link);
+//     link.click();
+//     link.remove();
+
+//     // Revoke after the browser has had time to start the download.
+//     window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+//     setCameraError('');
+//   } catch (error) {
+//     console.error('Photo strip export failed:', error);
+
+//     setCameraError(
+//       error instanceof Error
+//         ? `Export failed: ${error.message}`
+//         : 'Export failed. Please try another photo.'
+//     );
+//   }
+// };
+
 const exportStrip = async () => {
   if (!photos.length) {
     setCameraError('Take or upload at least one photo first.');
@@ -132,7 +293,9 @@ const exportStrip = async () => {
     const gap = 18;
     const imageH = 560;
     const hasCaption = caption.trim().length > 0;
-    const footer = hasCaption ? 130 : 54;
+
+    // Reserve additional space for caption and footer.
+    const footer = hasCaption ? 150 : 90;
 
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -148,6 +311,7 @@ const exportStrip = async () => {
       throw new Error('Canvas is not supported by this browser.');
     }
 
+    // Background
     ctx.fillStyle = stripColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -157,7 +321,9 @@ const exportStrip = async () => {
 
         img.onload = () => {
           if (img.naturalWidth === 0 || img.naturalHeight === 0) {
-            reject(new Error('The selected photo has invalid dimensions.'));
+            reject(
+              new Error('The selected photo has invalid dimensions.')
+            );
           } else {
             resolve(img);
           }
@@ -177,13 +343,14 @@ const exportStrip = async () => {
       photos.map((photo) => loadImage(photo.data))
     );
 
+    // Draw all photos.
     images.forEach((img, i) => {
       const photo = photos[i];
       const x = pad;
       const y = pad + i * (imageH + gap);
       const boxW = width - pad * 2;
 
-      // Crop the image to fill its photo frame.
+      // Crop image to fill its photo frame.
       const scale = Math.max(
         boxW / img.naturalWidth,
         imageH / img.naturalHeight
@@ -199,6 +366,7 @@ const exportStrip = async () => {
       ctx.rect(x, y, boxW, imageH);
       ctx.clip();
 
+      // Apply selected filter.
       ctx.filter =
         FILTERS.find((f) => f.id === photo.filter)?.css || 'none';
 
@@ -216,7 +384,7 @@ const exportStrip = async () => {
 
       ctx.filter = 'none';
 
-      // Add the selected prop overlay.
+      // Add selected prop overlay.
       if (photo.prop) {
         const overlay = PROPS.find((p) => p.id === photo.prop);
 
@@ -230,19 +398,41 @@ const exportStrip = async () => {
       ctx.restore();
     });
 
-    // Draw the caption.
+    // Draw caption.
     if (hasCaption) {
+      ctx.save();
+
       ctx.fillStyle = '#302b28';
       ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
       ctx.font = 'italic 34px Georgia, serif';
+
       ctx.fillText(
         caption.trim().slice(0, 48),
         width / 2,
-        canvas.height - 65
+        canvas.height - 92
       );
+
+      ctx.restore();
     }
 
-    // Export as a PNG Blob for better memory handling.
+    // Draw Made with ❤️ footer.
+    ctx.save();
+
+    ctx.fillStyle = '#777777';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = '24px Arial, sans-serif';
+
+    ctx.fillText(
+      'Made with ❤️',
+      width / 2,
+      canvas.height - 38
+    );
+
+    ctx.restore();
+
+    // Export as PNG Blob.
     const blob = await new Promise((resolve, reject) => {
       try {
         canvas.toBlob((result) => {
@@ -257,19 +447,22 @@ const exportStrip = async () => {
       }
     });
 
+    // Download image.
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
 
     link.href = url;
     link.download = 'snapstrip-photobooth.png';
+
     document.body.appendChild(link);
     link.click();
     link.remove();
 
-    // Revoke after the browser has had time to start the download.
+    // Release memory.
     window.setTimeout(() => URL.revokeObjectURL(url), 2000);
 
     setCameraError('');
+
   } catch (error) {
     console.error('Photo strip export failed:', error);
 
@@ -280,7 +473,6 @@ const exportStrip = async () => {
     );
   }
 };
-
 
   const currentFilter = FILTERS.find(f => f.id === filter)?.css || 'none';
 
